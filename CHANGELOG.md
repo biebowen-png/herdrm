@@ -7,6 +7,12 @@ the Sparkle update description — a release without a section here fails CI.
 
 ## [Unreleased]
 
+### Fixed
+- **New terminals and agents keep the chosen remote space.** Opening either
+  sheet from a remote space's menu or the current selection no longer resets
+  the space while initializing the device picker. Manually changing devices
+  still resets the space for the newly chosen device.
+
 ### Added
 - **Select and transfer several files at once.** Use Command-click, Shift-click
   or Select All in either Files pane, then upload or download the selection
