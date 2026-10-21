@@ -1859,20 +1859,21 @@ final class AppModel: ObservableObject {
             sessions[deviceID]?.attachmentCapabilities =
                 AgentAttachmentCapabilityRegistry(manifests: manifests)
             let advertised = manifests.map(\.agent)
-            if device(deviceID)?.isLocal == true {
+            if case .tailcat = service.device.kind {
+                // Tailcat carries only the RPC socket, with no remote shell.
+                sessions[deviceID]?.agentCatalog = .loaded(kinds: advertised)
+            } else {
                 // Herdr supports OMP through its lifecycle extension, so it has
                 // no screen-detection manifest in server.agent_manifests.
-                let found = await service.installedAgents(
+                let found = try await service.installedAgents(
                     from: advertised,
                     includingIntegrationKinds: ["omp"],
-                    overrides: AgentBinaryOverrides.load()
+                    overrides: service.device.isLocal ? AgentBinaryOverrides.load() : [:]
                 )
                 sessions[deviceID]?.agentCatalog = .loaded(
                     kinds: found.map(\.kind),
                     paths: Dictionary(uniqueKeysWithValues: found.map { ($0.kind, $0.path) })
                 )
-            } else {
-                sessions[deviceID]?.agentCatalog = .loaded(kinds: advertised)
             }
         } catch {
             sessions[deviceID]?.agentCatalog = .failed(error.localizedDescription)
