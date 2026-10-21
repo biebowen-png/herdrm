@@ -1859,7 +1859,8 @@ final class AppModel: ObservableObject {
             sessions[deviceID]?.attachmentCapabilities =
                 AgentAttachmentCapabilityRegistry(manifests: manifests)
             let advertised = manifests.map(\.agent)
-            if case .tailcat = service.device.kind {
+            let catalogDevice = await service.device
+            if case .tailcat = catalogDevice.kind {
                 // Tailcat carries only the RPC socket, with no remote shell.
                 sessions[deviceID]?.agentCatalog = .loaded(kinds: advertised)
             } else {
@@ -1868,7 +1869,7 @@ final class AppModel: ObservableObject {
                 let found = try await service.installedAgents(
                     from: advertised,
                     includingIntegrationKinds: ["omp"],
-                    overrides: service.device.isLocal ? AgentBinaryOverrides.load() : [:]
+                    overrides: catalogDevice.isLocal ? AgentBinaryOverrides.load() : [:]
                 )
                 sessions[deviceID]?.agentCatalog = .loaded(
                     kinds: found.map(\.kind),
