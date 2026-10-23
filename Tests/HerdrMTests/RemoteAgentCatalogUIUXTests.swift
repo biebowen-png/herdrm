@@ -30,6 +30,7 @@ final class RemoteAgentCatalogUIUXTests: XCTestCase {
         XCTAssertFalse(sidebar.sheetButtonNames.contains { $0.contains("Recent project") })
         XCTAssertTrue(sidebar.sheetButtonNames.contains("claude"), "\(sidebar.sheetButtonNames)")
         XCTAssertTrue(sidebar.sheetButtonNames.contains("codex"), "\(sidebar.sheetButtonNames)")
+        try sidebar.writeSheetDemo()
         try sidebar.clickSheetButton(named: "codex")
         let binary = HerdrService.binaryName(for: "codex")
         XCTAssertTrue(sidebar.sheetTexts.contains(String(localized: "Appended to \(binary). Defaults live in Settings → Agents.")),

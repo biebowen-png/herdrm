@@ -35,6 +35,13 @@ jobs:
       - name: Install XcodeGen
         run: brew install xcodegen
       - run: make uiux-test
+      - name: Save synthetic UI demos
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: synthetic-ui-demos
+          path: /tmp/herdr-pr-demo/*.png
+          if-no-files-found: error
 
   secrets:
     name: Secret scan (gitleaks)

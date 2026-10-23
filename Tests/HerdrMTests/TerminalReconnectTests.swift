@@ -29,6 +29,9 @@ final class TerminalReconnectTests: XCTestCase {
             entry: agents[0], sessions: agents + [shell, other],
             endedAttach: Binding(get: { ended }, set: { ended = $0 }),
             attachRetry: Binding(get: { retries }, set: { retries = $0 })))
+        if exitCode == 255 {
+            try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/reconnect.png"))
+        }
         try sidebar.clickAction(named: String(localized: exitCode == 255 ? "Reconnect device terminals" : "Reconnect"))
         XCTAssertEqual(retries[agents[0].id], 1)
         XCTAssertTrue(ended[agents[0].id] == nil)

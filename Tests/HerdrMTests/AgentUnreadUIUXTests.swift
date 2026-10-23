@@ -12,9 +12,11 @@ final class AgentUnreadUIUXTests: XCTestCase {
         finish(entries[1], in: sidebar.model)
         XCTAssertTrue(sidebar.model.isUnread(entries[0]))
         XCTAssertTrue(sidebar.model.isUnread(entries[1]))
+        try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/unread-before.png"))
         try sidebar.clickAgentTitleWithoutSettling("Agent 1")
         XCTAssertFalse(sidebar.model.isUnread(entries[0]))
         XCTAssertTrue(sidebar.model.isUnread(entries[1]), "Opening one agent must not read the other")
+        try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/unread-after.png"))
     }
 
     func testClickingAlreadySelectedAgentAcknowledgesItsResult() throws {
