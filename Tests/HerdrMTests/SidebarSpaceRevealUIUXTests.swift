@@ -66,6 +66,9 @@ final class SidebarSpaceRevealUIUXTests: XCTestCase {
             let originalMaxOffset = sidebar.maxOffset
             let originalAgentRow = try sidebar.paneRowFrame("Agent 1")
             let originalTerminalRow = try sidebar.paneRowFrame("Terminal test1")
+            if index == 0 {
+                try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/sidebar-\(grouped ? "grouped" : "flat")-before.png"))
+            }
             if click.accessibility {
                 try sidebar.pressPaneTitle(click.title)
             } else if click.pane == agentRef {
@@ -89,6 +92,10 @@ final class SidebarSpaceRevealUIUXTests: XCTestCase {
             XCTAssertEqual(terminalRowAfterClick.minY, originalTerminalRow.minY, accuracy: 1,
                            "\(context): Terminal row frame \(originalTerminalRow) -> \(terminalRowAfterClick); \(layout)")
 
+            if index < 2 {
+                try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/sidebar-\(grouped ? "grouped" : "flat")-click-\(index + 1).png"))
+            }
+
             // The terminal's programmatic first-responder callback follows the
             // sidebar selection. It must not cause a second, delayed scroll.
             sidebar.model.focusVisiblePane(click.pane)
@@ -110,6 +117,7 @@ final class SidebarSpaceRevealUIUXTests: XCTestCase {
         sidebar.model.focusVisiblePane(terminalRef, revealSpace: true)
         sidebar.settleSidebar()
         XCTAssertTrue(sidebar.visibleSpaceRow(terminalSpace), "An explicit click in the right terminal must still reveal its space")
+        try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/sidebar-\(grouped ? "grouped" : "flat")-explicit-reveal.png"))
         sidebar.scroll(.bottom)
         sidebar.model.reveal(terminalRef)
         sidebar.settleSidebar()
