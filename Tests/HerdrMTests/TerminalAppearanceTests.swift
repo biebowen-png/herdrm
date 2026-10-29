@@ -38,7 +38,13 @@ final class TerminalAppearanceTests: XCTestCase {
         window.contentView = view
         view.setSurfaceVisible(true)
         view.layoutSubtreeIfNeeded()
-        try await waitUntil { view.attachedSurface != nil }
+        try await waitUntil {
+            guard view.attachedSurface != nil, let grid = view.gridMetrics, let viewport = host.viewport
+            else { return false }
+            return grid.columns == viewport.columns && grid.rows == viewport.rows
+                && grid.widthPixels == UInt32(view.bounds.width * window.backingScaleFactor)
+                && grid.heightPixels == UInt32(view.bounds.height * window.backingScaleFactor)
+        }
         XCTAssertNotNil(view.attachedSurface)
 
         // A small, test-owned PTY models herdr attach's full repaint on WINCH.
@@ -83,7 +89,6 @@ final class TerminalAppearanceTests: XCTestCase {
         let originalText = try XCTUnwrap(session.readViewportText())
         XCTAssertTrue(originalText.contains("INPUT test1"))
         XCTAssertTrue(originalText.contains("MESSAGE test2"))
-        try await PRDemoCapture.save("system-mono-light.png", window: window)
         // Verify the repaint protocol here. Metal-backed view snapshots can
         // omit the presented frame, so actual colors are checked in the app.
 
@@ -97,7 +102,6 @@ final class TerminalAppearanceTests: XCTestCase {
         XCTAssertTrue(host.session === session)
         XCTAssertEqual(host.process.shellPid, pid, "A theme change must not restart the attached process")
 
-        try await PRDemoCapture.save("theme-dark.png", window: window)
         let darkRedrawCount = delegate.redrawCount
         setAppearance(dark: false, view: view, window: window)
         try await waitUntil { delegate.redrawCount > darkRedrawCount }
@@ -107,7 +111,6 @@ final class TerminalAppearanceTests: XCTestCase {
         XCTAssertTrue(view.processHost === host)
         XCTAssertTrue(host.session === session)
         XCTAssertEqual(host.process.shellPid, pid, "Switching back must keep the original attached process")
-        try await PRDemoCapture.save("theme-light-restored.png", window: window)
     }
 
     func testRedrawSizeChangesPixelsWithoutChangingTheGridOrCellSize() throws {
@@ -159,7 +162,8 @@ final class TerminalAppearanceTests: XCTestCase {
 }
 
 @MainActor
-private final class AppearanceDelegate: TerminalSurfaceLifecycleDelegate, TerminalSurfaceTitleDelegate {
+private final class AppearanceDelegate: TerminalSurfaceLifecycleDelegate, TerminalSurfaceTitleDelegate,
+    TerminalSurfaceGridResizeDelegate {
     private weak var view: LineBreakTerminalView?
     private(set) var redrawCount = 0
 
@@ -167,6 +171,7 @@ private final class AppearanceDelegate: TerminalSurfaceLifecycleDelegate, Termin
 
     func terminalDidAttachSurface(_ surface: TerminalSurface) { view?.attachedSurface = surface }
     func terminalDidDetachSurface() { view?.attachedSurface = nil }
+    func terminalDidResize(_ size: TerminalGridMetrics) { view?.gridMetrics = size }
     func terminalDidChangeTitle(_ title: String) {
         redrawCount = Int(title.split(separator: "-").last ?? "") ?? 0
     }
