@@ -28,7 +28,7 @@ jobs:
       - name: Render synthetic SidebarSpaceRevealUIUXTests demo
         run: |
           make gen
-          xcodebuild test -project HerdrM.xcodeproj -scheme HerdrM -configuration Debug -derivedDataPath build -destination 'platform=macOS,arch=arm64' CODE_SIGN_IDENTITY='-' CODE_SIGN_STYLE=Manual -skipPackagePluginValidation -only-testing:HerdrMTests/SidebarSpaceRevealUIUXTests
+          xcodebuild test -project HerdrM.xcodeproj -scheme HerdrM -configuration Debug -derivedDataPath build -destination 'platform=macOS,arch=arm64' CODE_SIGN_IDENTITY='-' CODE_SIGN_STYLE=Manual -skipPackagePluginValidation -only-testing:HerdrMTests/SidebarSpaceRevealUIUXTests -only-testing:HerdrMTests/SidebarAgentHistoryUIUXTests
       - name: Save synthetic UI demos
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
