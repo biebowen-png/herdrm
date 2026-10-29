@@ -25,6 +25,7 @@ final class AgentUnreadUIUXTests: XCTestCase {
         model.updateSnapshotAttention(agents: recovering, deviceID: deviceID)
         XCTAssertTrue(model.updateSnapshotAttention(agents: completed, deviceID: deviceID).isEmpty)
         XCTAssertTrue(model.visibleAgents.allSatisfy { !model.isUnread($0) })
+        try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/completion-restored.png"))
 
         // A turn that starts AND finishes while disconnected must still notify,
         // even when the displayed status is done on both sides of the gap.
@@ -35,11 +36,13 @@ final class AgentUnreadUIUXTests: XCTestCase {
                        [offlineResult[0].paneID])
         let entry = try XCTUnwrap(model.visibleAgents.first { $0.agent.paneID == offlineResult[0].paneID })
         XCTAssertTrue(model.isUnread(entry))
+        try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/completion-new-result.png"))
         try sidebar.clickAgentTitleWithoutSettling(entry.title)
         XCTAssertEqual(model.selectedPane, entry.ref)
         XCTAssertFalse(model.isUnread(entry))
         XCTAssertTrue(model.updateSnapshotAttention(agents: offlineResult, deviceID: deviceID).isEmpty)
         XCTAssertFalse(model.isUnread(entry), "Replaying the acknowledged completion must not restore the dot")
+        try sidebar.writeSnapshot(to: URL(fileURLWithPath: "/tmp/herdr-pr-demo/completion-acknowledged.png"))
     }
 
     func testStatusEventWaitsForCompletionSnapshotAndDoesNotConsumeIt() throws {
